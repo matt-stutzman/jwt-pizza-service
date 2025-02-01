@@ -1,1 +1,2 @@
 1-11-25: Did JWT Pizza Service, JWT Pizza Data exercises
+2-11-25: Have just barely started deliverable 3 (and by that I mean the prereq exercises). I know this is late :(
