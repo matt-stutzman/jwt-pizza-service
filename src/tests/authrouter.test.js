@@ -30,5 +30,14 @@ test('register', async () => {
 test('logout', async() => {
     const logoutResponse = await request(app).delete('/api/auth').set("Authorization", "Bearer " + testUserAuthToken);
     expect(logoutResponse.status).toBe(200);
+})
 
+test('bad logout', async() =>{
+    const badLogoutResponse = await request(app).delete('/api/auth');
+    expect(badLogoutResponse).not.toBe(200);
+})
+
+test('bad register', async() => {
+    const badRegisterResponse = await request(app).post('/api/auth').send({name:"bob", email: "bob@gmail.com"});
+    expect(badRegisterResponse).not.toBe(200);
 })
