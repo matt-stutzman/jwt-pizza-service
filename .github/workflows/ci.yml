@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set_version.outputs.version }}
-    services:
+    #services:
       # mysql:
       #   image: mysql:8.0.29
       #   env:
