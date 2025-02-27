@@ -12,6 +12,7 @@ class CatFact {
         this.facts.push(fact);
         return fact;
       } catch (error) {
+        console.log(error);
         return null;
       }
     }

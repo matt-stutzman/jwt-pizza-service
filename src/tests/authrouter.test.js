@@ -17,6 +17,7 @@ test('login', async () => {
 
   const { password, ...user } = { ...testUser, roles: [{ role: 'diner' }] };
   expect(loginRes.body.user).toMatchObject(user);
+  expect(password).toBeTruthy();
 });
 
 test('register', async () => {
@@ -25,6 +26,7 @@ test('register', async () => {
     expect(registerResponse.body.token).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
     const { password, ...user } = { ...testUser, roles: [{ role: 'diner' }] };
     expect(registerResponse.body.user).toMatchObject(user);
+    expect(password).toBeTruthy();
 })
 
 test('logout', async() => {

@@ -1,5 +1,6 @@
 const CatFact = require('./catFact')
 
+
 test('Proper initialization', ()=>{
     let cat = new CatFact();
     expect(cat.facts).toEqual([]);
