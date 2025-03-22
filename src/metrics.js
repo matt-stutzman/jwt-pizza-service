@@ -1,11 +1,11 @@
 const os = require('os');
 const config = require('./config');
 
-const requests = {};
-//track the authtokens?
-const users = {};
-const successfulAuth = {};
-const failureAuth = {};
+// const requests = {};
+// //track the authtokens?
+// const users = {};
+// const successfulAuth = {};
+// const failureAuth = {};
 
 /*
 
@@ -42,20 +42,20 @@ class Metrics{
     putRequests = 0;
     deleteRequests = 0;
 
-    Os = 0;
+    //Os = 0;
     memory = 0;
 
     successfulAuth = 0;
     failedAuth = 0;
 
-    soldPizzas = 0;
-    revenue = 0;
-
-    serviceLatencyStart;
-    serviceLatencyEnd;
-
-    pizzaCreateStart;
-    pizzaCreateEnd;
+    // soldPizzas = 0;
+    // revenue = 0;
+    //
+    // serviceLatencyStart;
+    // serviceLatencyEnd;
+    //
+    // pizzaCreateStart;
+    // pizzaCreateEnd;
 
     users = {};
 
@@ -77,6 +77,101 @@ class Metrics{
     incrementSuccessAuth(){
         this.successfulAuth += 1;
     }
+
+    addUser(authtoken){
+        this.users[authtoken] = Date.now();
+    }
+    deleteUser(authtoken){
+        this.users.delete(authtoken);
+    }
+
+    getCpuUsagePercentage() {
+        const cpuUsage = os.loadavg()[0] / os.cpus().length;
+        return cpuUsage.toFixed(2) * 100;
+    }
+
+    makeMetric(metricName, metricValue, unit, type){
+        let singleMetric = {
+            name: metricName,
+            unit: unit,
+            [type]: {
+                dataPoints:[
+                    {
+                        asDouble: metricValue,
+                        timeUnixNano: Date.now() * 1000000
+                    }
+                ]
+            }
+        }
+        if(type === "sum"){
+            type.aggregationTemporality = 'AGGREGATION_TEMPORALITY_CUMULATIVE'
+            type.isMonotonic = true;
+        }
+        return singleMetric;
+    }
+
+    getMemoryUsagePercentage() {
+        const totalMemory = os.totalmem();
+        const freeMemory = os.freemem();
+        const usedMemory = totalMemory - freeMemory;
+        const memoryUsage = (usedMemory / totalMemory) * 100;
+        return memoryUsage.toFixed(2);
+    }
+
+
+    startSendingMetrics(pd){
+        setInterval(() => {
+            let metrics2Send = [];
+            let mem = this.getMemoryUsagePercentage();
+            metrics2Send.push(this.makeMetric("memory", mem, "%", "gauge"));
+
+            let cpu = this.getCpuUsagePercentage();
+            metrics2Send.push(this.makeMetric("cpu", cpu, "%", "gauge"));
+
+            metrics2Send.push(this.makeMetric("getRequests", this.getRequests, "1", "sum"));
+            metrics2Send.push(this.makeMetric("postRequests", this.postRequests, "1", "sum"));
+            metrics2Send.push(this.makeMetric("putRequests", this.putRequests, "1", "sum"));
+            metrics2Send.push(this.makeMetric("deleteRequests", this.deleteRequests, "1", "sum"));
+            metrics2Send.push(this.makeMetric("successfulAuth", this.successfulAuth, "1", "sum"));
+            metrics2Send.push(this.makeMetric("failedAuth", this.failedAuth, "1", "sum"));
+
+            this.sendMetricToGrafana(metrics2Send);
+        }, pd)
+    }
+
+    sendMetricToGrafana(metrics){
+        let body = {
+            resourceMetrics: [
+                {
+                    scopeMetrics: [
+                        {
+                            metrics: metrics
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const reqBody = JSON.stringify(body);
+        fetch(`${config.url}`, {
+            method: 'POST',
+            body: reqBody,
+            headers: { Authorization: `Bearer ${config.apiKey}`, 'Content-Type': 'application/json' },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    response.text().then((text) => {
+                        console.error(`Failed to push metrics data to Grafana: ${text}\n${reqBody}`);
+                    });
+                } else {
+                    console.log(`Pushed to grafana`);
+                }
+            })
+            .catch((error) => {
+                console.error('Error pushing metrics:', error);
+            });
+
+    }
     //list out all metric attributes
     //num getRequests
     //num postRequests
@@ -90,71 +185,7 @@ class Metrics{
     //method to send metric to grafana
 }
 
-function getCpuUsagePercentage() {
-  const cpuUsage = os.loadavg()[0] / os.cpus().length;
-  return cpuUsage.toFixed(2) * 100;
-}
-
-function getMemoryUsagePercentage() {
-  const totalMemory = os.totalmem();
-  const freeMemory = os.freemem();
-  const usedMemory = totalMemory - freeMemory;
-  const memoryUsage = (usedMemory / totalMemory) * 100;
-  return memoryUsage.toFixed(2);
-}
-
-function sendMetricToGrafana(metricName, metricValue, type, unit) {
-    const metric = {
-      resourceMetrics: [
-        {
-          scopeMetrics: [
-            {
-              metrics: [
-                {
-                  name: metricName,
-                  unit: unit,
-                  [type]: {
-                    dataPoints: [
-                      {
-                        asDouble: metricValue,
-                        timeUnixNano: Date.now() * 1000000,
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    };
-  
-    if (type === 'sum') {
-      metric.resourceMetrics[0].scopeMetrics[0].metrics[0][type].aggregationTemporality = 'AGGREGATION_TEMPORALITY_CUMULATIVE';
-      metric.resourceMetrics[0].scopeMetrics[0].metrics[0][type].isMonotonic = true;
-    }
-  
-    const body = JSON.stringify(metric);
-    fetch(`${config.url}`, {
-      method: 'POST',
-      body: body,
-      headers: { Authorization: `Bearer ${config.apiKey}`, 'Content-Type': 'application/json' },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          response.text().then((text) => {
-            console.error(`Failed to push metrics data to Grafana: ${text}\n${body}`);
-          });
-        } else {
-          console.log(`Pushed ${metricName}`);
-        }
-      })
-      .catch((error) => {
-        console.error('Error pushing metrics:', error);
-      });
-  }
-
 const metrics = new Metrics();
 
-module.exports = { metrics };
+export default metrics;
 //export instance of the class

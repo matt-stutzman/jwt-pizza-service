@@ -8,6 +8,7 @@
     "test": "jest",
     "lint": "eslint ."
   },
+  "type": "module",
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^5.1.1",
