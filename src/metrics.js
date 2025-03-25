@@ -187,5 +187,5 @@ class Metrics{
 
 const metrics = new Metrics();
 
-export default metrics;
+module.exports = {metrics};
 //export instance of the class
