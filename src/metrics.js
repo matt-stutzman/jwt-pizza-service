@@ -92,7 +92,7 @@ class Metrics{
 
     makeMetric(metricName, metricValue, unit, type){
         let singleMetric;
-        if(type == "sum"){
+        if(type === "sum"){
             singleMetric = {
                 name: metricName,
                 unit: unit,
