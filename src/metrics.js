@@ -91,22 +91,41 @@ class Metrics{
     }
 
     makeMetric(metricName, metricValue, unit, type){
-        let singleMetric = {
-            name: metricName,
-            unit: unit,
-            [type]: {
-                dataPoints:[
-                    {
-                        asDouble: metricValue,
-                        timeUnixNano: Date.now() * 1000000
-                    }
-                ]
+        let singleMetric;
+        if(type == "sum"){
+            singleMetric = {
+                name: metricName,
+                unit: unit,
+                [type]: {
+                    dataPoints:[
+                        {
+                            asDouble: metricValue,
+                            timeUnixNano: Date.now() * 1000000
+                        }
+                    ],
+                aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
+                isMonotonic: true,
+                }
+            }             
+        }
+        else{
+            singleMetric = {
+                name: metricName,
+                unit: unit,
+                [type]: {
+                    dataPoints:[
+                        {
+                            asDouble: metricValue,
+                            timeUnixNano: Date.now() * 1000000
+                        }
+                    ]
+                }
             }
         }
-        if(type === "sum"){
-            type.aggregationTemporality = 'AGGREGATION_TEMPORALITY_CUMULATIVE'
-            type.isMonotonic = true;
-        }
+        // if(type === "sum"){
+        //     type.aggregationTemporality = 'AGGREGATION_TEMPORALITY_CUMULATIVE'
+        //     type.isMonotonic = true;
+        // }
         return singleMetric;
     }
 
@@ -153,10 +172,12 @@ class Metrics{
         };
 
         const reqBody = JSON.stringify(body);
-        fetch(`${config.url}`, {
+
+        //console.log(reqBody);
+        fetch(`${config.metrics.url}`, {
             method: 'POST',
             body: reqBody,
-            headers: { Authorization: `Bearer ${config.apiKey}`, 'Content-Type': 'application/json' },
+            headers: { Authorization: `Bearer ${config.metrics.apiKey}`, 'Content-Type': 'application/json' },
         })
             .then((response) => {
                 if (!response.ok) {
