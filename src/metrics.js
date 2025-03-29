@@ -82,7 +82,7 @@ class Metrics{
         this.users[authtoken] = Date.now();
     }
     deleteUser(authtoken){
-        this.users.delete(authtoken);
+        delete this.users[authtoken];
     }
 
     getCpuUsagePercentage() {
