@@ -147,14 +147,24 @@ class Metrics{
             let cpu = this.getCpuUsagePercentage();
             metrics2Send.push(this.makeMetric("cpu", cpu, "%", "gauge"));
 
+            console.log("get requests = " + this.getRequests);
+            console.log("post requests = " + this.postRequests);
+            console.log("delete requests = " + this.deleteRequests);
+            console.log("put requests = " + this.putRequests);
+            console.log("total requests = " + (this.getRequests + this.deleteRequests + this.postRequests + this.putRequests));
+
+
             metrics2Send.push(this.makeMetric("getRequests", this.getRequests, "1", "sum"));
             metrics2Send.push(this.makeMetric("postRequests", this.postRequests, "1", "sum"));
             metrics2Send.push(this.makeMetric("putRequests", this.putRequests, "1", "sum"));
             metrics2Send.push(this.makeMetric("deleteRequests", this.deleteRequests, "1", "sum"));
             metrics2Send.push(this.makeMetric("successfulAuth", this.successfulAuth, "1", "sum"));
             metrics2Send.push(this.makeMetric("failedAuth", this.failedAuth, "1", "sum"));
+            metrics2Send.push(this.makeMetric("totalRequests", (this.getRequests + this.deleteRequests + this.postRequests + this.putRequests), "1", "sum"));
 
+            
             this.sendMetricToGrafana(metrics2Send);
+            
         }, pd)
     }
 
@@ -172,7 +182,7 @@ class Metrics{
         };
 
         const reqBody = JSON.stringify(body);
-
+        //console.log(reqBody);
         //console.log(reqBody);
         fetch(`${config.metrics.url}`, {
             method: 'POST',
