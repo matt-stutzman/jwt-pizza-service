@@ -94,13 +94,9 @@ authRouter.put(
     }
     catch(err){
         metrics.incrementFailAuth();
+        throw err;
     }
-    if(user !== undefined){
-        metrics.incrementSuccessAuth()
-    }
-    else{
-        metrics.incrementFailAuth();
-    }
+    metrics.incrementSuccessAuth();
     const auth = await setAuth(user);
     metrics.addUser(auth);
     res.json({ user: user, token: auth });
