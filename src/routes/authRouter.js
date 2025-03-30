@@ -89,7 +89,12 @@ authRouter.put(
     metrics.incrementPutRequests();
     const { email, password } = req.body;
     if(!email || !password) {metrics.incrementFailAuth();}
-    const user = await DB.getUser(email, password);
+    try {
+        const user = await DB.getUser(email, password);
+    }
+    catch(err){
+        metrics.incrementFailAuth();
+    }
     if(user !== undefined){
         metrics.incrementSuccessAuth()
     }

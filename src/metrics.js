@@ -164,8 +164,11 @@ class Metrics{
             // console.log("delete requests = " + this.deleteRequests);
             // console.log("put requests = " + this.putRequests);
             // console.log("total requests = " + (this.getRequests + this.deleteRequests + this.postRequests + this.putRequests));
-            console.log("cpu = " + cpu);
-            console.log("mem = " + mem);
+            // console.log("cpu = " + cpu);
+            // console.log("mem = " + mem);
+            console.log("failed auth = " + this.failedAuth);
+            console.log("successful auth = " + this.successfulAuth);
+            console.log("total auth = " + (this.successfulAuth + this.failedAuth)); 
 
 
             metrics2Send.push(this.makeMetric("getRequests", this.getRequests, "1", "sum"));
@@ -175,7 +178,7 @@ class Metrics{
             metrics2Send.push(this.makeMetric("successfulAuth", this.successfulAuth, "1", "sum"));
             metrics2Send.push(this.makeMetric("failedAuth", this.failedAuth, "1", "sum"));
             metrics2Send.push(this.makeMetric("totalRequests", (this.getRequests + this.deleteRequests + this.postRequests + this.putRequests), "1", "sum"));
-
+            metrics2Send.push(this.makeMetric("totalAuthAttemps", (this.successfulAuth + this.failedAuth), "1", "sum"));
             
             this.sendMetricToGrafana(metrics2Send);
             
