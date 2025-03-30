@@ -42,11 +42,14 @@ class Metrics{
     putRequests = 0;
     deleteRequests = 0;
 
+    pizzasOrdered = 0;
+    creationFailures = 0;
     //Os = 0;
     memory = 0;
 
     successfulAuth = 0;
     failedAuth = 0;
+    revenue = 0;
 
     // soldPizzas = 0;
     // revenue = 0;
@@ -76,6 +79,18 @@ class Metrics{
     }
     incrementSuccessAuth(){
         this.successfulAuth += 1;
+    }
+
+    incrementPizzasOrdered(numPizzas){
+        this.pizzasOrdered += numPizzas;
+    }
+
+    incrementCreationFailures(){
+        this.creationFailures += 1;
+    }
+
+    incrementRevenue(revenue){
+        this.revenue += revenue;
     }
 
     addUser(authtoken){
@@ -166,9 +181,12 @@ class Metrics{
             // console.log("total requests = " + (this.getRequests + this.deleteRequests + this.postRequests + this.putRequests));
             // console.log("cpu = " + cpu);
             // console.log("mem = " + mem);
-            console.log("failed auth = " + this.failedAuth);
-            console.log("successful auth = " + this.successfulAuth);
-            console.log("total auth = " + (this.successfulAuth + this.failedAuth)); 
+            // console.log("failed auth = " + this.failedAuth);
+            // console.log("successful auth = " + this.successfulAuth);
+            // console.log("total auth = " + (this.successfulAuth + this.failedAuth)); 
+            // console.log("total pizzas = " + this.pizzasOrdered);
+            // console.log("total revenue = " + this.revenue);
+            console.log("creation failures = " + this.creationFailures);
 
 
             metrics2Send.push(this.makeMetric("getRequests", this.getRequests, "1", "sum"));
@@ -179,6 +197,10 @@ class Metrics{
             metrics2Send.push(this.makeMetric("failedAuth", this.failedAuth, "1", "sum"));
             metrics2Send.push(this.makeMetric("totalRequests", (this.getRequests + this.deleteRequests + this.postRequests + this.putRequests), "1", "sum"));
             metrics2Send.push(this.makeMetric("totalAuthAttemps", (this.successfulAuth + this.failedAuth), "1", "sum"));
+            metrics2Send.push(this.makeMetric("totalPizzas", this.pizzasOrdered, "1", "sum"));
+            metrics2Send.push(this.makeMetric("totalRevenue", this.revenue, "1","sum"));
+            metrics2Send.push(this.makeMetric("creationFailures", this.creationFailures, "1","sum"));
+
             
             this.sendMetricToGrafana(metrics2Send);
             

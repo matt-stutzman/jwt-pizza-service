@@ -83,23 +83,36 @@ orderRouter.post(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    metrics.incrementPostRequests();
+      metrics.incrementPostRequests();
 
-    const orderReq = req.body;
-    const order = await DB.addDinerOrder(req.user, orderReq);
-    const r = await fetch(`${config.factory.url}/api/order`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
-      body: JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }),
-    });
-    const j = await r.json();
-    logger.factoryLogger(r.body);
-    if (r.ok) {
-      res.send({ order, reportSlowPizzaToFactoryUrl: j.reportUrl, jwt: j.jwt });
-    } else {
-      res.status(500).send({ message: 'Failed to fulfill order at factory', reportPizzaCreationErrorToPizzaFactoryUrl: j.reportUrl });
+      const orderReq = req.body;
+      const order = await DB.addDinerOrder(req.user, orderReq);
+      //console.log("order = " + (order.items.length));
+      let numPizzas = order.items.length;
+      if(numPizzas < 21){
+      metrics.incrementPizzasOrdered(numPizzas);
+        let revenue = 0;
+        for(let i = 0; i < order.items.length; i++){
+          revenue += order.items[i].price;
+        }
+        metrics.incrementRevenue(revenue);
+      }
+      const r = await fetch(`${config.factory.url}/api/order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
+        body: JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }),
+      });
+      const j = await r.json();
+      logger.factoryLogger(r.body);
+      if (r.ok) {
+        res.send({ order, reportSlowPizzaToFactoryUrl: j.reportUrl, jwt: j.jwt });
+      } else {
+        metrics.incrementCreationFailures();
+        console.log("failed to make pizzas after fetch");
+        res.status(500).send({ message: 'Failed to fulfill order at factory', reportPizzaCreationErrorToPizzaFactoryUrl: j.reportUrl });
+      }
     }
-  })
+  )
 );
 
 module.exports = orderRouter;
