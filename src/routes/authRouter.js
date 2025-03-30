@@ -111,9 +111,13 @@ authRouter.delete(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    //date.now()
     metrics.incrementDeleteRequests();
     metrics.deleteUser(readAuthToken(req));
     await clearAuth(req);
+    //date.now
+    //update metrics service latency
+    //do everything before res.json
     res.json({ message: 'logout successful' });
   })
 );

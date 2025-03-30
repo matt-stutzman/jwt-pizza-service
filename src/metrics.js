@@ -51,6 +51,9 @@ class Metrics{
     failedAuth = 0;
     revenue = 0;
 
+    authLatency;
+    orderLatency;
+    franchiseLatency;
     // soldPizzas = 0;
     // revenue = 0;
     //
@@ -96,6 +99,7 @@ class Metrics{
     addUser(authtoken){
         this.users[authtoken] = Date.now();
     }
+
     deleteUser(authtoken){
         delete this.users[authtoken];
     }
@@ -164,6 +168,9 @@ class Metrics{
         return memoryUsage.toFixed(2);
     }
 
+    getActiveUsers(){
+        return Object.keys(this.users).length;
+    }
 
     startSendingMetrics(pd){
         setInterval(() => {
@@ -173,6 +180,8 @@ class Metrics{
 
             let cpu = this.getCpuUsagePercentage();
             metrics2Send.push(this.makeMetric("cpu", cpu, "%", "gauge"));
+
+            let numUsers = this.getActiveUsers();
 
             // console.log("get requests = " + this.getRequests);
             // console.log("post requests = " + this.postRequests);
@@ -186,7 +195,8 @@ class Metrics{
             // console.log("total auth = " + (this.successfulAuth + this.failedAuth)); 
             // console.log("total pizzas = " + this.pizzasOrdered);
             // console.log("total revenue = " + this.revenue);
-            console.log("creation failures = " + this.creationFailures);
+            // console.log("creation failures = " + this.creationFailures);
+            // console.log("num users = " + numUsers);
 
 
             metrics2Send.push(this.makeMetric("getRequests", this.getRequests, "1", "sum"));
@@ -200,7 +210,7 @@ class Metrics{
             metrics2Send.push(this.makeMetric("totalPizzas", this.pizzasOrdered, "1", "sum"));
             metrics2Send.push(this.makeMetric("totalRevenue", this.revenue, "1","sum"));
             metrics2Send.push(this.makeMetric("creationFailures", this.creationFailures, "1","sum"));
-
+            metrics2Send.push(this.makeMetric("numUsers", numUsers, "1","sum"));
             
             this.sendMetricToGrafana(metrics2Send);
             
