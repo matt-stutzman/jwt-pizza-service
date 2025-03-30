@@ -100,7 +100,13 @@ class Metrics{
                     dataPoints:[
                         {
                             asDouble: metricValue,
-                            timeUnixNano: Date.now() * 1000000
+                            timeUnixNano: Date.now() * 1000000,
+                            attributes: [
+                                {
+                                    key: "source",
+                                    value: {"stringValue": config.metrics.source}
+                                }
+                            ]
                         }
                     ],
                 aggregationTemporality: 'AGGREGATION_TEMPORALITY_CUMULATIVE',
@@ -116,10 +122,16 @@ class Metrics{
                     dataPoints:[
                         {
                             asDouble: metricValue,
-                            timeUnixNano: Date.now() * 1000000
+                            timeUnixNano: Date.now() * 1000000,
+                            attributes: [
+                                {
+                                    key: "source",
+                                    value: {"stringValue": config.metrics.source}
+                                }
+                            ],
                         }
                     ]
-                }
+                },
             }
         }
         // if(type === "sum"){
@@ -147,11 +159,13 @@ class Metrics{
             let cpu = this.getCpuUsagePercentage();
             metrics2Send.push(this.makeMetric("cpu", cpu, "%", "gauge"));
 
-            console.log("get requests = " + this.getRequests);
-            console.log("post requests = " + this.postRequests);
-            console.log("delete requests = " + this.deleteRequests);
-            console.log("put requests = " + this.putRequests);
-            console.log("total requests = " + (this.getRequests + this.deleteRequests + this.postRequests + this.putRequests));
+            // console.log("get requests = " + this.getRequests);
+            // console.log("post requests = " + this.postRequests);
+            // console.log("delete requests = " + this.deleteRequests);
+            // console.log("put requests = " + this.putRequests);
+            // console.log("total requests = " + (this.getRequests + this.deleteRequests + this.postRequests + this.putRequests));
+            console.log("cpu = " + cpu);
+            console.log("mem = " + mem);
 
 
             metrics2Send.push(this.makeMetric("getRequests", this.getRequests, "1", "sum"));
