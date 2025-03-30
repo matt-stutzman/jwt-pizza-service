@@ -51,9 +51,8 @@ class Metrics{
     failedAuth = 0;
     revenue = 0;
 
-    authLatency;
-    orderLatency;
-    franchiseLatency;
+    requestLatency = 0;
+    pizzaLatency = 0;
     // soldPizzas = 0;
     // revenue = 0;
     //
@@ -104,6 +103,14 @@ class Metrics{
         delete this.users[authtoken];
     }
 
+    setPizzaLatency(latency){
+        this.pizzaLatency = latency;
+    }
+
+    setRequestLatency(latency){
+        this.requestLatency = latency;
+    }
+
     getCpuUsagePercentage() {
         const cpuUsage = os.loadavg()[0] / os.cpus().length;
         return cpuUsage.toFixed(2) * 100;
@@ -111,7 +118,7 @@ class Metrics{
 
     makeMetric(metricName, metricValue, unit, type){
         let singleMetric;
-        if(type === "sum"){
+        if(type === "sum" || type === "histogram"){
             singleMetric = {
                 name: metricName,
                 unit: unit,
@@ -197,7 +204,8 @@ class Metrics{
             // console.log("total revenue = " + this.revenue);
             // console.log("creation failures = " + this.creationFailures);
             // console.log("num users = " + numUsers);
-
+            console.log("pizza latency = " + this.pizzaLatency);
+            console.log("request latency = " + this.requestLatency);
 
             metrics2Send.push(this.makeMetric("getRequests", this.getRequests, "1", "sum"));
             metrics2Send.push(this.makeMetric("postRequests", this.postRequests, "1", "sum"));
@@ -211,6 +219,8 @@ class Metrics{
             metrics2Send.push(this.makeMetric("totalRevenue", this.revenue, "1","sum"));
             metrics2Send.push(this.makeMetric("creationFailures", this.creationFailures, "1","sum"));
             metrics2Send.push(this.makeMetric("numUsers", numUsers, "1","sum"));
+            metrics2Send.push(this.makeMetric("requestLatency",this.requestLatency, "ms", "sum"));
+            metrics2Send.push(this.makeMetric("pizzaLatency",this.pizzaLatency, "ms", "sum"));
             
             this.sendMetricToGrafana(metrics2Send);
             

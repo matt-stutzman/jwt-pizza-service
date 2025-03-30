@@ -47,7 +47,11 @@ orderRouter.endpoints = [
 orderRouter.get(
   '/menu',
   asyncHandler(async (req, res) => {
+    let start = Date.now();
     metrics.incrementGetRequests();
+    let end = Date.now();
+    let latency = end - start;
+    metrics.setRequestLatency(latency);
     res.send(await DB.getMenu());
   })
 );
@@ -57,6 +61,7 @@ orderRouter.put(
   '/menu',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    let start = Date.now();
     metrics.incrementPutRequests();
     if (!req.user.isRole(Role.Admin)) {
       throw new StatusCodeError('unable to add menu item', 403);
@@ -64,6 +69,9 @@ orderRouter.put(
 
     const addMenuItemReq = req.body;
     await DB.addMenuItem(addMenuItemReq);
+    let end = Date.now();
+    let latency = end - start;
+    metrics.setRequestLatency(latency);
     res.send(await DB.getMenu());
   })
 );
@@ -73,7 +81,11 @@ orderRouter.get(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    let start = Date.now();
     metrics.incrementGetRequests();
+    let end = Date.now();
+    let latency = end - start;
+    metrics.setRequestLatency(latency);
     res.json(await DB.getOrders(req.user, req.query.page));
   })
 );
@@ -83,6 +95,7 @@ orderRouter.post(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+      let requestStart = Date.now();
       metrics.incrementPostRequests();
 
       const orderReq = req.body;
@@ -97,11 +110,18 @@ orderRouter.post(
         }
         metrics.incrementRevenue(revenue);
       }
+      let start = Date.now();
       const r = await fetch(`${config.factory.url}/api/order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
         body: JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }),
       });
+      let end = Date.now();
+      let latency = end - start;
+      metrics.setPizzaLatency(latency);
+      let requestEnd = Date.now();
+      let requestLatency = requestEnd - requestStart;
+      metrics.setRequestLatency(requestLatency);
       const j = await r.json();
       logger.factoryLogger(r.body);
       if (r.ok) {

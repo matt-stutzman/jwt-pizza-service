@@ -68,6 +68,7 @@ authRouter.authenticateToken = (req, res, next) => {
 authRouter.post(
   '/',
   asyncHandler(async (req, res) => {
+    let start = Date.now();
     metrics.incrementPostRequests();
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -78,6 +79,9 @@ authRouter.post(
     const auth = await setAuth(user);
     metrics.incrementSuccessAuth();
     metrics.addUser(auth);
+    let end = Date.now();
+    let latency = end - start;
+    metrics.setRequestLatency(latency);
     res.json({ user: user, token: auth });
   })
 );
@@ -86,6 +90,7 @@ authRouter.post(
 authRouter.put(
   '/',
   asyncHandler(async (req, res) => {
+    let start = Date.now();
     metrics.incrementPutRequests();
     const { email, password } = req.body;
     if(!email || !password) {metrics.incrementFailAuth();}
@@ -102,6 +107,9 @@ authRouter.put(
     }
     const auth = await setAuth(user);
     metrics.addUser(auth);
+    let end = Date.now();
+    let latency = end - start;
+    metrics.setRequestLatency(latency);
     res.json({ user: user, token: auth });
   })
 );
@@ -111,6 +119,7 @@ authRouter.delete(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    let start = Date.now();
     //date.now()
     metrics.incrementDeleteRequests();
     metrics.deleteUser(readAuthToken(req));
@@ -118,6 +127,9 @@ authRouter.delete(
     //date.now
     //update metrics service latency
     //do everything before res.json
+    let end = Date.now();
+    let latency = end - start;
+    metrics.setRequestLatency(latency);
     res.json({ message: 'logout successful' });
   })
 );
@@ -127,6 +139,7 @@ authRouter.put(
   '/:userId',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    let start = Date.now();
     metrics.incrementPutRequests();
     const { email, password } = req.body;
     const userId = Number(req.params.userId);
@@ -136,6 +149,9 @@ authRouter.put(
     }
 
     const updatedUser = await DB.updateUser(userId, email, password);
+    let end = Date.now();
+    let latency = end - start;
+    metrics.setRequestLatency(latency);
     res.json(updatedUser);
   })
 );
