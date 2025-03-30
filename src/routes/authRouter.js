@@ -89,14 +89,17 @@ authRouter.put(
     metrics.incrementPutRequests();
     const { email, password } = req.body;
     if(!email || !password) {metrics.incrementFailAuth();}
+    let user;
     try {
-        const user = await DB.getUser(email, password);
+        user = await DB.getUser(email, password);
     }
     catch(err){
         metrics.incrementFailAuth();
         throw err;
     }
-    metrics.incrementSuccessAuth();
+    if(user != undefined){
+      metrics.incrementSuccessAuth();
+    }
     const auth = await setAuth(user);
     metrics.addUser(auth);
     res.json({ user: user, token: auth });
