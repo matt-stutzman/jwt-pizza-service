@@ -204,8 +204,8 @@ class Metrics{
             // console.log("total revenue = " + this.revenue);
             // console.log("creation failures = " + this.creationFailures);
             // console.log("num users = " + numUsers);
-            console.log("pizza latency = " + this.pizzaLatency);
-            console.log("request latency = " + this.requestLatency);
+            // console.log("pizza latency = " + this.pizzaLatency);
+            // console.log("request latency = " + this.requestLatency);
 
             metrics2Send.push(this.makeMetric("getRequests", this.getRequests, "1", "sum"));
             metrics2Send.push(this.makeMetric("postRequests", this.postRequests, "1", "sum"));
