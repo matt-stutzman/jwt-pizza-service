@@ -176,6 +176,12 @@ class Metrics{
     }
 
     getActiveUsers(){
+        //delete inactive authtokens;
+        Object.keys(this.users).forEach(user => {
+            if(Date.now() - this.users[user] > 300000){
+                delete this.users[user]
+            }
+        });
         return Object.keys(this.users).length;
     }
 
