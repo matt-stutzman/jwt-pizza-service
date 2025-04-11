@@ -64,6 +64,9 @@ class DB {
     try {
       const userResult = await this.query(connection, `SELECT * FROM user WHERE email=?`, [email]);
       const user = userResult[0];
+      if(!user){
+        console.log("there was no user");
+      }
       if (!user || !(await bcrypt.compare(password, user.password))) {
         throw new StatusCodeError('unknown user', 404);
       }
@@ -91,8 +94,9 @@ class DB {
         params.push(`email='${email}'`);
       }
       if (params.length > 0) {
-        const query = `UPDATE user SET ${params.join(', ')} WHERE id=${userId}`;
-        await this.query(connection, query);
+        const query = `UPDATE user SET ?,? WHERE id=${userId}`;
+        console.log(query);
+        await this.query(connection, `UPDATE user SET ?,? WHERE id=${userId}`,[params[0], params[1]]);
       }
       return this.getUser(email, password);
     } finally {

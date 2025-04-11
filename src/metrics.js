@@ -260,7 +260,7 @@ class Metrics{
                         console.error(`Failed to push metrics data to Grafana: ${text}\n${reqBody}`);
                     });
                 } else {
-                    console.log(`Pushed to grafana`);
+                    //console.log(`Pushed to grafana`);
                 }
             })
             .catch((error) => {
